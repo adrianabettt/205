@@ -2,76 +2,74 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>TROCA DE REGRAS - REVISADO</title>
+    <title>TROCA DE REGRAS - BNCC EF02CO01</title>
     <style>
-        /* FONTE ARIAL E CORES VIBRANTES */
         body { 
             font-family: Arial, Helvetica, sans-serif; 
             text-align: center; 
             background: #FFF9C4; 
-            padding: 10px; 
+            padding: 5px; 
             margin: 0;
+            overflow: hidden; /* Evita scroll na maioria das telas de projetor */
         }
 
         .box { 
-            max-width: 950px; 
-            min-height: 90vh; 
-            margin: 10px auto; 
+            max-width: 900px; 
+            height: 95vh; 
+            margin: 5px auto; 
             background: white; 
-            padding: 30px; 
+            padding: 15px; 
             border-radius: 40px; 
-            border: 12px solid #FBC02D; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
+            border: 10px solid #FBC02D; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
             display: flex;
             flex-direction: column;
-            justify-content: space-around;
+            justify-content: space-between;
+            align-items: center;
         }
 
         h1 { 
             color: #F9A825; 
-            font-size: 50px; 
-            margin: 0; 
+            font-size: 38px; 
+            margin: 5px 0; 
             text-transform: uppercase;
-            letter-spacing: 2px;
         }
 
         .instrucao { 
-            font-size: 35px; 
+            font-size: 28px; 
             background: #FFF59D; 
-            padding: 25px; 
+            padding: 15px; 
             border-radius: 20px; 
-            margin: 15px 0; 
+            margin: 5px 0; 
             font-weight: bold;
             text-transform: uppercase;
-            line-height: 1.5;
             border: 3px dashed #F9A825;
+            width: 90%;
         }
 
         b { 
             color: #E65100; 
-            font-size: 45px; 
+            font-size: 36px; 
             display: block;
-            margin-top: 10px;
         }
 
-        /* ÁREA DOS ITENS AMPLIADA */
         #area {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 20px;
-            padding: 20px;
+            gap: 15px;
+            width: 100%;
         }
 
         .item { 
-            font-size: 110px; 
-            width: 180px; 
-            height: 180px; 
+            font-size: 90px; 
+            width: 140px; 
+            height: 140px; 
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 6px solid #EEE; 
-            border-radius: 30px; 
+            border: 5px solid #EEE; 
+            border-radius: 25px; 
             cursor: pointer; 
             transition: 0.2s; 
             background: #FAFAFA;
@@ -80,44 +78,41 @@
         .item.selected { 
             border-color: #FBC02D; 
             background: #FFFDE7; 
-            transform: scale(1.08); 
-            box-shadow: 0 8px 20px rgba(251, 192, 45, 0.5);
+            transform: scale(1.05); 
+            box-shadow: 0 5px 15px rgba(251, 192, 45, 0.4);
         }
 
-        /* BOTÃO GRANDE E CHAMATIVO */
         button { 
-            padding: 25px 70px; 
-            font-size: 35px; 
+            padding: 15px 50px; 
+            font-size: 28px; 
             background: #F9A825; 
             color: white; 
             border: none; 
-            border-radius: 25px; 
+            border-radius: 20px; 
             cursor: pointer; 
             font-weight: bold; 
-            box-shadow: 0 8px #E65100; 
+            box-shadow: 0 6px #E65100; 
             text-transform: uppercase;
         }
 
         button:active { 
             box-shadow: none; 
-            transform: translateY(6px); 
+            transform: translateY(4px); 
         }
 
         .progresso { 
-            font-size: 26px; 
+            font-size: 22px; 
             color: #795548; 
             font-weight: bold; 
-            text-transform: uppercase;
-            margin-top: 15px;
+            margin-top: 10px;
         }
 
-        #tela-nota { display: none; }
+        #tela-nota { display: none; justify-content: center; align-items: center; }
 
         .nota-final { 
-            font-size: 180px; 
+            font-size: 150px; 
             font-weight: bold; 
             color: #FBC02D; 
-            margin: 20px 0; 
         }
     </style>
 </head>
@@ -141,7 +136,7 @@
 
     <div id="tela-nota" class="box">
         <h1>🏁 ATIVIDADE CONCLUÍDA</h1>
-        <p style="font-size: 45px; font-weight: bold;">SUA NOTA É:</p>
+        <p style="font-size: 35px; font-weight: bold; margin: 0;">SUA NOTA É:</p>
         <div id="valor-nota" class="nota-final">0</div>
         <button onclick="location.reload()">JOGAR DE NOVO</button>
     </div>
@@ -183,10 +178,23 @@
         const area = document.getElementById('area');
         area.innerHTML = "";
 
-        // MOSTRAR 6 ITENS ALEATÓRIOS
-        const itensExibidos = [...bancoItens].sort(() => Math.random() - 0.5).slice(0, 6);
+        // Lógica para garantir ao menos 1 item correto
+        let itensCorretos = bancoItens.filter(i => i[regraDaRodada.chave] === regraDaRodada.valor);
+        let itensIncorretos = bancoItens.filter(i => i[regraDaRodada.chave] !== regraDaRodada.valor);
+        
+        // Sorteia 1 correto obrigatoriamente e 5 outros aleatórios
+        let exibidos = [];
+        exibidos.push(itensCorretos[Math.floor(Math.random() * itensCorretos.length)]);
+        
+        let embaralhado = [...bancoItens].sort(() => Math.random() - 0.5);
+        for(let i=0; i<5; i++) {
+            exibidos.push(embaralhado[i]);
+        }
+        
+        // Embaralha os 6 finais para o correto não ficar sempre na primeira posição
+        exibidos.sort(() => Math.random() - 0.5);
 
-        itensExibidos.forEach((it) => {
+        exibidos.forEach((it) => {
             let d = document.createElement('div');
             d.className = 'item';
             d.innerText = it.e;
@@ -214,12 +222,8 @@
             }
         });
 
-        // NOTA DA RODADA (MAX 1 PONTO POR RODADA)
-        let notaRodada = 0;
-        if (totalCorretosNaTela > 0) {
-            notaRodada = (acertosAluno - errosAluno) / totalCorretosNaTela;
-        }
-        
+        // Cálculo da nota da rodada (proporcional aos acertos)
+        let notaRodada = (acertosAluno - errosAluno) / totalCorretosNaTela;
         if (notaRodada < 0) notaRodada = 0;
         somaNotas += notaRodada;
 
