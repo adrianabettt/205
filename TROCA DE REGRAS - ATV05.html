@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>TROCA DE REGRAS - REVISADO</title>
+    <style>
+        /* FONTE ARIAL E CORES VIBRANTES */
+        body { 
+            font-family: Arial, Helvetica, sans-serif; 
+            text-align: center; 
+            background: #FFF9C4; 
+            padding: 10px; 
+            margin: 0;
+        }
+
+        .box { 
+            max-width: 950px; 
+            min-height: 90vh; 
+            margin: 10px auto; 
+            background: white; 
+            padding: 30px; 
+            border-radius: 40px; 
+            border: 12px solid #FBC02D; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+        }
+
+        h1 { 
+            color: #F9A825; 
+            font-size: 50px; 
+            margin: 0; 
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .instrucao { 
+            font-size: 35px; 
+            background: #FFF59D; 
+            padding: 25px; 
+            border-radius: 20px; 
+            margin: 15px 0; 
+            font-weight: bold;
+            text-transform: uppercase;
+            line-height: 1.5;
+            border: 3px dashed #F9A825;
+        }
+
+        b { 
+            color: #E65100; 
+            font-size: 45px; 
+            display: block;
+            margin-top: 10px;
+        }
+
+        /* ÁREA DOS ITENS AMPLIADA */
+        #area {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .item { 
+            font-size: 110px; 
+            width: 180px; 
+            height: 180px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 6px solid #EEE; 
+            border-radius: 30px; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            background: #FAFAFA;
+        }
+
+        .item.selected { 
+            border-color: #FBC02D; 
+            background: #FFFDE7; 
+            transform: scale(1.08); 
+            box-shadow: 0 8px 20px rgba(251, 192, 45, 0.5);
+        }
+
+        /* BOTÃO GRANDE E CHAMATIVO */
+        button { 
+            padding: 25px 70px; 
+            font-size: 35px; 
+            background: #F9A825; 
+            color: white; 
+            border: none; 
+            border-radius: 25px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            box-shadow: 0 8px #E65100; 
+            text-transform: uppercase;
+        }
+
+        button:active { 
+            box-shadow: none; 
+            transform: translateY(6px); 
+        }
+
+        .progresso { 
+            font-size: 26px; 
+            color: #795548; 
+            font-weight: bold; 
+            text-transform: uppercase;
+            margin-top: 15px;
+        }
+
+        #tela-nota { display: none; }
+
+        .nota-final { 
+            font-size: 180px; 
+            font-weight: bold; 
+            color: #FBC02D; 
+            margin: 20px 0; 
+        }
+    </style>
+</head>
+<body>
+
+    <div id="jogo" class="box">
+        <h1>🔄 TROCA DE REGRAS</h1>
+        
+        <div class="instrucao">
+            QUAL É A REGRA AGORA?
+            <b id="regra">CARREGANDO...</b>
+        </div>
+
+        <div id="area"></div>
+
+        <div class="controles">
+            <button onclick="proximo()" id="btn-acao">CONFERIR RESPOSTA</button>
+            <div class="progresso">DESAFIO: <span id="cont-fase">1</span> DE 10</div>
+        </div>
+    </div>
+
+    <div id="tela-nota" class="box">
+        <h1>🏁 ATIVIDADE CONCLUÍDA</h1>
+        <p style="font-size: 45px; font-weight: bold;">SUA NOTA É:</p>
+        <div id="valor-nota" class="nota-final">0</div>
+        <button onclick="location.reload()">JOGAR DE NOVO</button>
+    </div>
+
+<script>
+    const bancoItens = [
+        {e: "🍎", cor: "VERMELHO", tipo: "COMIDA"},
+        {e: "🚗", cor: "VERMELHO", tipo: "MÁQUINA"},
+        {e: "🍓", cor: "VERMELHO", tipo: "COMIDA"},
+        {e: "🚒", cor: "VERMELHO", tipo: "MÁQUINA"},
+        {e: "🍌", cor: "AMARELO", tipo: "COMIDA"},
+        {e: "🚜", cor: "AMARELO", tipo: "MÁQUINA"},
+        {e: "🧀", cor: "AMARELO", tipo: "COMIDA"},
+        {e: "🐥", cor: "AMARELO", tipo: "ANIMAL"},
+        {e: "🍅", cor: "VERMELHO", tipo: "COMIDA"},
+        {e: "🚁", cor: "VERMELHO", tipo: "MÁQUINA"}
+    ];
+
+    const regrasSorteio = [
+        {txt: "TUDO QUE É VERMELHO", chave: "cor", valor: "VERMELHO"},
+        {txt: "TUDO QUE É AMARELO", chave: "cor", valor: "AMARELO"},
+        {txt: "TUDO QUE É DE COMER", chave: "tipo", valor: "COMIDA"},
+        {txt: "TUDO QUE É MÁQUINA", chave: "tipo", valor: "MÁQUINA"}
+    ];
+
+    let faseAtual = 1;
+    let somaNotas = 0;
+    let regraDaRodada = {};
+
+    function iniciarFase() {
+        regraDaRodada = regrasSorteio[Math.floor(Math.random() * regrasSorteio.length)];
+        document.getElementById('regra').innerText = regraDaRodada.txt;
+        document.getElementById('cont-fase').innerText = faseAtual;
+        
+        if (faseAtual === 10) {
+            document.getElementById('btn-acao').innerText = "VER NOTA FINAL";
+        }
+
+        const area = document.getElementById('area');
+        area.innerHTML = "";
+
+        // MOSTRAR 6 ITENS ALEATÓRIOS
+        const itensExibidos = [...bancoItens].sort(() => Math.random() - 0.5).slice(0, 6);
+
+        itensExibidos.forEach((it) => {
+            let d = document.createElement('div');
+            d.className = 'item';
+            d.innerText = it.e;
+            d.dataset.valorAtributo = it[regraDaRodada.chave];
+            d.onclick = () => d.classList.toggle('selected');
+            area.appendChild(d);
+        });
+    }
+
+    function proximo() {
+        const cards = document.querySelectorAll('.item');
+        let totalCorretosNaTela = 0;
+        let acertosAluno = 0;
+        let errosAluno = 0;
+
+        cards.forEach(card => {
+            const selecionado = card.classList.contains('selected');
+            const ehCorreto = card.dataset.valorAtributo === regraDaRodada.valor;
+
+            if (ehCorreto) {
+                totalCorretosNaTela++;
+                if (selecionado) acertosAluno++;
+            } else {
+                if (selecionado) errosAluno++;
+            }
+        });
+
+        // NOTA DA RODADA (MAX 1 PONTO POR RODADA)
+        let notaRodada = 0;
+        if (totalCorretosNaTela > 0) {
+            notaRodada = (acertosAluno - errosAluno) / totalCorretosNaTela;
+        }
+        
+        if (notaRodada < 0) notaRodada = 0;
+        somaNotas += notaRodada;
+
+        if (faseAtual < 10) {
+            faseAtual++;
+            iniciarFase();
+        } else {
+            finalizar();
+        }
+    }
+
+    function finalizar() {
+        document.getElementById('jogo').style.display = 'none';
+        document.getElementById('tela-nota').style.display = 'flex';
+        
+        let notaFinal = Math.round(somaNotas); 
+        if (notaFinal > 10) notaFinal = 10;
+        if (notaFinal < 0) notaFinal = 0;
+        
+        document.getElementById('valor-nota').innerText = notaFinal;
+    }
+
+    iniciarFase();
+</script>
+</body>
+</html>
